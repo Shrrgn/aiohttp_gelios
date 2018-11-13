@@ -1,0 +1,15 @@
+{% extends "wrapper.html"%}
+
+{% block content %}
+        <div>
+            <h4>Units:</h4>
+            {% for i in units_data%}
+            <ul>
+                <li>id: {{ i["id"] }}</li>
+                <li>name: {{ i["name"] }}</li>
+                <li>creator: {{ i["creator"] }}</li>
+            </ul>
+            <hr>
+            {% endfor %}
+        </div>
+{% endblock %}
