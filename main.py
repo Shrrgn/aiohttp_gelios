@@ -24,7 +24,7 @@ async def init_app():
 
     init_data()
     app.on_startup.append(init_connection)
-    #app.on_startup.append(close_connection)
+    app.on_cleanup.append(close_connection)
 
     setup_routes(app)
 
