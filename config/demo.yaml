@@ -2,8 +2,8 @@ host: 127.0.0.1
 port: 8080
 
 mysql:
-  database: aiohttp_demo_db
+  database: demo_db
   user: root
   password: 123456
-  host: localhost
-  port: 3306
+  host_mysql: localhost
+  port_mysql: 3306

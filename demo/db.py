@@ -1,71 +1,41 @@
-from sqlalchemy import create_engine
+import aiomysql.sa
 
 try:
     from demo.settings import config
     from demo.utils import get_data
+    from demo.init_db import users_table, units_table
 except ImportError as e:
-    from .demo.settings import config
-    from .demo.utils import get_data
+    from settings import config
+    from utils import get_data
+    from init_db import users_table, units_table
 
 # install mysqlclient
 
-DSN = "mysql://{user}:{password}@{host}:{port}/{database}"
-ADMIN_DB_URL = DSN.format(
-    user=config["mysql"]["user"],
-    password=config["mysql"]["password"],
-    host=config["mysql"]["host"],
-    port=config["mysql"]["port"],
-    database=config["mysql"]["database"]
-)
+
+async def init_connection(app):
+    engine = await aiomysql.sa.create_engine(
+        db=config["mysql"]["database"],
+        user=config["mysql"]["user"],
+        password="123456",
+        host=config["mysql"]["host_mysql"],
+        port=config["mysql"]["port_mysql"],
+    )
+    app['db'] = engine
 
 
-class DataInDB:
-
-    def __int__(self):
-        engine = create_engine(ADMIN_DB_URL)
-        self.conn = engine.connect()
-
-    async def insert_users(self, url):
-        data = await get_data(url)
-
-        for i in data:
-            conn.execute("INSERT INTO users (id,login) VALUES ({0},{1});".format(i["id"], i["login"]))
-
-    async def insert_units(self, url):
-        data = await get_data(url)
-
-        for i in data:
-            conn.execute(
-                "INSERT INTO users (id,name,creator) VALUES ({0},{1},{2});".format(
-                                                                               i["id"],
-                                                                               i["name"],
-                                                                               i["creator"]
-                                                                               )
-            )
-
-    def tear_down(self):
-        self.conn.close()
+async def close_connection(app):
+    app['db'].close()
+    await app['db'].wait_closed()
 
 
-'''
-import json
-from urllib.request import urlopen
+async def get_users(conn):
+    res = await conn.execute(users_table.select())
+    users = await res.fetchall()
+    return users
 
-url = "http://admin.geliospro.com/sdk/?login=demo&pass=demo&svc=get_users&params={}"
 
-data = json.loads(urlopen(url).read().decode())
+async def get_units(conn):
+    res = await conn.execute(units_table.select())
+    units = await res.fetchall()
+    return units
 
-conn
-
-create table users(
-    id INT,
-    login VARCHAR(20)
-) ENGINE=INNODB;
-
-create table units(
-    id INT,
-    name VARCHAR(20),
-    creator INT
-) ENGINE=INNODB;
-
-'''
